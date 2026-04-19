@@ -15,6 +15,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [0.1.0] — 2026-04-19
 
 ### Added
+- [#21](https://github.com/BiplabGH/IntegratedFactory/pull/21) Bs if feat/fix workflow 2 (@BiplabGH)
 - Animated "coming soon" landing page (`index.html`) with particle network, HUD status indicators, and progress bar
 - OPC-UA simulator for CNC, conveyor, and robot arm machines
 - MQTT broker configuration (EMQX + Solace) with OPC-UA bridge
