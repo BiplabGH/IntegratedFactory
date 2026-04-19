@@ -31,6 +31,7 @@ jobs:
           api_location: ""
           output_location: ""
           skip_app_build: true
+<<<<<<< HEAD
 
   build_and_deploy_staging:
     if: github.ref == 'refs/heads/staging' && (github.event_name == 'push')
@@ -52,6 +53,8 @@ jobs:
           output_location: ""
           skip_app_build: true
           deployment_environment: staging
+=======
+>>>>>>> master
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
