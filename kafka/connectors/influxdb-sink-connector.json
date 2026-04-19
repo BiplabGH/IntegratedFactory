@@ -1,0 +1,16 @@
+{
+  "name": "influxdb-sink",
+  "config": {
+    "connector.class": "io.confluent.influxdb.InfluxDbSinkConnector",
+    "tasks.max": "1",
+    "topics": "factory.machines.cnc,factory.machines.conveyor,factory.machines.robot",
+    "influxdb.url": "http://influxdb:8086",
+    "influxdb.token": "${INFLUXDB_TOKEN}",
+    "influxdb.org": "IntegratedFactory",
+    "influxdb.bucket": "raw_historian",
+    "measurement.name.format": "${topic}",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}

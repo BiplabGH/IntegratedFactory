@@ -1,0 +1,32 @@
+{{- if .Values.agents.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: factory-agents
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: factory-agents
+spec:
+  replicas: {{ .Values.agents.replicas }}
+  selector:
+    matchLabels:
+      app: factory-agents
+  template:
+    metadata:
+      labels:
+        app: factory-agents
+    spec:
+      containers:
+        - name: agents
+          image: {{ .Values.global.imageRegistry }}/{{ .Values.agents.image }}
+          env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: anthropic-secret
+                  key: api-key
+            - name: MCP_SERVER_URL
+              value: "http://mcp-server:3000"
+            - name: KAFKA_BOOTSTRAP
+              value: "kafka:9092"
+{{- end }}

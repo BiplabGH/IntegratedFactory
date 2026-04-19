@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_workorder_form_view_integrated" model="ir.ui.view">
+        <field name="name">mrp.workorder.form.integrated</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_workorder_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='workcenter_id']" position="after">
+                <field name="machine_id" placeholder="e.g. cnc_001"/>
+                <field name="machine_status_id" readonly="1" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

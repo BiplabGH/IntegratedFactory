@@ -1,0 +1,51 @@
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+    - pipeline: ci
+      source: IntegratedFactory-CI
+      trigger:
+        branches:
+          include:
+            - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: DeployInfra
+    displayName: Deploy Azure Infrastructure
+    jobs:
+      - job: BicepDeploy
+        steps:
+          - task: AzureCLI@2
+            displayName: Deploy Bicep
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az deployment group create \
+                  --resource-group $(RESOURCE_GROUP) \
+                  --template-file azure/bicep/main.bicep \
+                  --parameters environment=prod
+
+  - stage: DeployK8s
+    displayName: Deploy to AKS
+    dependsOn: DeployInfra
+    jobs:
+      - job: HelmDeploy
+        steps:
+          - task: HelmDeploy@0
+            displayName: Helm upgrade
+            inputs:
+              connectionType: Kubernetes Service Connection
+              kubernetesServiceConnection: $(AKS_SERVICE_CONNECTION)
+              namespace: factory
+              command: upgrade
+              chartType: FilePath
+              chartPath: k8s/
+              releaseName: integrated-factory
+              valueFile: k8s/values-prod.yaml
+              arguments: --install --wait --timeout 10m

@@ -1,0 +1,29 @@
+# Solace PubSub+ configuration for Unified Namespace (UNS)
+# Deploy via Solace PubSub+ Cloud or self-hosted Docker
+
+service:
+  name: solace-pubsub
+  image: solace/solace-pubsubplus:latest
+  ports:
+    - "55555:55555"   # SMF (Solace Message Format)
+    - "8008:8008"     # REST messaging
+    - "1943:1943"     # MQTT over TLS
+    - "9000:9000"     # Semp API
+
+environment:
+  username_admin_globalaccesslevel: admin
+  username_admin_password: factory-admin
+
+vpn:
+  name: IntegratedFactory
+  topic_namespace: "factory"
+
+# UNS topic hierarchy mirrors ISA-95 model:
+#   factory/{enterprise}/{site}/{area}/{line}/{machine}/{datatype}
+#   Example: factory/plant1/area_a/cnc/001/telemetry
+bridges:
+  - name: mqtt-to-uns
+    source_broker: emqx
+    source_topic: "factory/#"
+    target_topic: "factory/#"
+    protocol: mqtt
