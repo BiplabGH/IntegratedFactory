@@ -11,3 +11,4 @@ This project is to create a simulated factory which will have
 6. Integration with Azure Cloud
 7. Agentic AI with MCP and A2A
 8. Integration with some SaaS
+# IntegratedFactory
