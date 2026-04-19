@@ -1,0 +1,28 @@
+machines:
+  - id: cnc_001
+    type: cnc
+    name: "CNC Machine 001"
+    mqtt_topic: "factory/machines/cnc/001"
+    update_interval_ms: 500
+
+  - id: conv_001
+    type: conveyor
+    name: "Conveyor Belt 001"
+    mqtt_topic: "factory/machines/conveyor/001"
+    update_interval_ms: 1000
+
+  - id: robot_001
+    type: robot_arm
+    name: "Robot Arm 001"
+    mqtt_topic: "factory/machines/robot/001"
+    update_interval_ms: 250
+
+opcua:
+  endpoint: "opc.tcp://0.0.0.0:4840/factory"
+  namespace: "urn:IntegratedFactory"
+
+mqtt:
+  broker: "${MQTT_BROKER:-localhost}"
+  port: ${MQTT_PORT:-1883}
+  client_id: "opcua-simulator"
+  qos: 1
