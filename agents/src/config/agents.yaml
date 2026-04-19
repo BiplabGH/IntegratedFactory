@@ -1,0 +1,28 @@
+agents:
+  quality:
+    name: QualityAgent
+    description: "Monitors machine telemetry for quality deviations and triggers alerts"
+    model: claude-sonnet-4-6
+    poll_interval_seconds: 30
+    thresholds:
+      tool_wear_percent: 80
+      vibration_mm_s: 1.0
+
+  maintenance:
+    name: MaintenanceAgent
+    description: "Predicts maintenance needs based on machine wear and cycle data"
+    model: claude-sonnet-4-6
+    poll_interval_seconds: 300
+    thresholds:
+      motor_temp_c: 70
+      tool_wear_percent: 90
+
+  production:
+    name: ProductionAgent
+    description: "Monitors production KPIs and work order progress against targets"
+    model: claude-sonnet-4-6
+    poll_interval_seconds: 60
+
+mcp_server:
+  command: "node"
+  args: ["/app/mcp-server/dist/index.js"]
