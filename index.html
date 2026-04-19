@@ -3,26 +3,333 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IntegratedFactory</title>
+  <title>Integrated Factory</title>
   <style>
-    body { 
-      background: #04080c; 
-      color: #00e5ff; 
-      font-family: monospace; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      height: 100vh; 
-      margin: 0;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #04080c;
+      color: #00e5ff;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
-    h1 { font-size: 2rem; letter-spacing: 4px; }
-    p { color: #3a5570; letter-spacing: 2px; font-size: 0.8rem; }
+
+    /* grid scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,229,255,.03) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,229,255,.03) 40px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* scanline sweep */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,229,255,.015) 50%);
+      background-size: 100% 4px;
+      animation: scanlines 8s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes scanlines {
+      from { background-position: 0 0; }
+      to   { background-position: 0 100vh; }
+    }
+
+    canvas#particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    /* hex logo */
+    .hex-ring {
+      width: 90px;
+      height: 90px;
+      position: relative;
+      animation: pulse-ring 3s ease-in-out infinite;
+    }
+    .hex-ring svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 12px #00e5ff88);
+    }
+    @keyframes pulse-ring {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50%       { transform: scale(1.08); filter: brightness(1.4); }
+    }
+
+    /* title */
+    h1 {
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #00e5ff;
+      text-shadow: 0 0 20px #00e5ffaa, 0 0 60px #00e5ff44;
+      animation: flicker 6s ease-in-out infinite;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; text-shadow: 0 0 20px #00e5ffaa, 0 0 60px #00e5ff44; }
+      20%, 24%, 55%                           { opacity: .6; text-shadow: none; }
+    }
+
+    /* typewriter subtitle */
+    .subtitle {
+      color: #1a6a80;
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      border-right: 2px solid #00e5ff88;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 0;
+      animation: typing 2.8s steps(38, end) 0.6s forwards, blink 0.9s step-end infinite;
+    }
+    @keyframes typing {
+      from { width: 0; }
+      to   { width: 38ch; }
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    /* status bar */
+    .status-bar {
+      display: flex;
+      gap: 32px;
+      opacity: 0;
+      animation: fade-up 0.8s ease 3.6s forwards;
+    }
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-label {
+      font-size: 0.55rem;
+      letter-spacing: 2px;
+      color: #1a4a60;
+      text-transform: uppercase;
+    }
+    .status-value {
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      color: #00e5ff;
+      text-shadow: 0 0 10px #00e5ff88;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #00e5ff;
+      box-shadow: 0 0 8px #00e5ff;
+      animation: dot-pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .3; transform: scale(.6); }
+    }
+
+    /* progress bar */
+    .progress-wrap {
+      width: min(360px, 80vw);
+      opacity: 0;
+      animation: fade-up 0.8s ease 4s forwards;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      color: #1a4a60;
+      margin-bottom: 6px;
+    }
+    .progress-track {
+      height: 3px;
+      background: #0a1a24;
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00e5ff, #0088aa);
+      box-shadow: 0 0 10px #00e5ff88;
+      border-radius: 2px;
+      animation: load-progress 4s cubic-bezier(.1,.8,.3,1) 4.2s forwards;
+    }
+    @keyframes load-progress {
+      0%   { width: 0%; }
+      30%  { width: 28%; }
+      60%  { width: 61%; }
+      85%  { width: 79%; }
+      100% { width: 87%; }
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* corner decorations */
+    .corner {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      opacity: .25;
+    }
+    .corner--tl { top: 20px; left: 20px; border-top: 1px solid #00e5ff; border-left: 1px solid #00e5ff; }
+    .corner--tr { top: 20px; right: 20px; border-top: 1px solid #00e5ff; border-right: 1px solid #00e5ff; }
+    .corner--bl { bottom: 20px; left: 20px; border-bottom: 1px solid #00e5ff; border-left: 1px solid #00e5ff; }
+    .corner--br { bottom: 20px; right: 20px; border-bottom: 1px solid #00e5ff; border-right: 1px solid #00e5ff; }
   </style>
 </head>
 <body>
-  <h1>⬡ INTEGRATEDFACTORY</h1>
-  <p>// INDUSTRIAL IOT PLATFORM · COMING SOON</p>
+  <canvas id="particles"></canvas>
+
+  <div class="corner corner--tl"></div>
+  <div class="corner corner--tr"></div>
+  <div class="corner corner--bl"></div>
+  <div class="corner corner--br"></div>
+
+  <div class="content">
+    <div class="hex-ring">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,4 93,27.5 93,72.5 50,96 7,72.5 7,27.5"
+                 stroke="#00e5ff" stroke-width="2" fill="none" opacity=".9"/>
+        <polygon points="50,16 83,33.5 83,66.5 50,84 17,66.5 17,33.5"
+                 stroke="#00e5ff" stroke-width="1" fill="none" opacity=".4"/>
+        <text x="50" y="57" text-anchor="middle" fill="#00e5ff"
+              font-family="monospace" font-size="24" font-weight="bold">⬡</text>
+      </svg>
+    </div>
+
+    <h1>INTEGRATED FACTORY</h1>
+
+    <p class="subtitle">// INDUSTRIAL IOT PLATFORM · COMING SOON</p>
+
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="status-label">OPC-UA</span>
+        <span class="status-dot"></span>
+        <span class="status-value">INIT</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">KAFKA</span>
+        <span class="status-dot" style="animation-delay:.3s"></span>
+        <span class="status-value">READY</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">MES</span>
+        <span class="status-dot" style="animation-delay:.6s"></span>
+        <span class="status-value">SYNC</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">AGENTS</span>
+        <span class="status-dot" style="animation-delay:.9s"></span>
+        <span class="status-value">BOOT</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>SYSTEM INITIALIZATION</span>
+        <span>87%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * W;
+        this.y = Math.random() * H;
+        this.vx = (Math.random() - .5) * .4;
+        this.vy = (Math.random() - .5) * .4;
+        this.r  = Math.random() * 1.5 + .3;
+        this.alpha = Math.random() * .5 + .1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,229,255,${this.alpha})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const d  = Math.sqrt(dx*dx + dy*dy);
+          if (d < 100) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(0,229,255,${(1 - d/100) * .07})`;
+            ctx.lineWidth = .5;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => { p.update(); p.draw(); });
+      drawConnections();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
 </body>
 </html>
