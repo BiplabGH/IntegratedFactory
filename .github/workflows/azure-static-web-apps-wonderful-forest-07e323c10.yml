@@ -31,7 +31,6 @@ jobs:
           api_location: ""
           output_location: ""
           skip_app_build: true
-<<<<<<< HEAD
 
   build_and_deploy_staging:
     if: github.ref == 'refs/heads/staging' && (github.event_name == 'push')
@@ -53,8 +52,6 @@ jobs:
           output_location: ""
           skip_app_build: true
           deployment_environment: staging
-=======
->>>>>>> master
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -66,3 +63,4 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_FOREST_07E323C10 }}
           action: "close"
+WORKFLOW
