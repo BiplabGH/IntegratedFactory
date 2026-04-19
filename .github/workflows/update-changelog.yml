@@ -1,0 +1,76 @@
+name: Update Changelog on PR
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, labeled]
+    branches:
+      - master
+      - staging
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine change category from PR labels
+        id: category
+        run: |
+          LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+          if echo "$LABELS" | grep -qi "breaking"; then
+            echo "category=### Changed (Breaking)" >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -qi "bug\|fix"; then
+            echo "category=### Fixed" >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -qi "deprecat"; then
+            echo "category=### Deprecated" >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -qi "remov"; then
+            echo "category=### Removed" >> $GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -qi "security"; then
+            echo "category=### Security" >> $GITHUB_OUTPUT
+          else
+            echo "category=### Added" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add PR entry to CHANGELOG [Unreleased]
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          CATEGORY: ${{ steps.category.outputs.category }}
+        run: |
+          ENTRY="- [#${PR_NUMBER}](${PR_URL}) ${PR_TITLE} (@${PR_AUTHOR})"
+
+          # Skip if this PR entry already exists
+          if grep -qF "#${PR_NUMBER}" CHANGELOG.md; then
+            echo "Entry for PR #${PR_NUMBER} already exists — skipping."
+            exit 0
+          fi
+
+          # Insert entry under [Unreleased] and the correct category heading.
+          # If the category heading doesn't exist yet, create it after the [Unreleased] marker.
+          if grep -qF "$CATEGORY" CHANGELOG.md; then
+            # Append under existing category heading
+            sed -i "/$CATEGORY/a\\$ENTRY" CHANGELOG.md
+          else
+            # Insert new category heading + entry after the [Unreleased] line
+            sed -i "/## \[Unreleased\]/a\\\\n$CATEGORY\\n$ENTRY" CHANGELOG.md
+          fi
+
+      - name: Commit updated CHANGELOG
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          # Only commit if there is a change
+          git diff --cached --quiet && echo "No changes to commit" || \
+            git commit -m "chore: add PR #${{ github.event.pull_request.number }} to CHANGELOG [skip ci]"
+          git push
