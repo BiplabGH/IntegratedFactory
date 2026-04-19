@@ -1,0 +1,66 @@
+global:
+  namespace: factory
+  imageRegistry: ""
+
+opcuaSimulator:
+  enabled: true
+  image: integrated-factory/opcua-simulator:latest
+  replicas: 1
+
+mqttBridge:
+  enabled: true
+  image: integrated-factory/mqtt-bridge:latest
+  replicas: 1
+
+emqx:
+  enabled: true
+  image: emqx/emqx:5.6
+  service:
+    mqttPort: 1883
+    wsPort: 8083
+    dashboardPort: 18083
+
+kafka:
+  enabled: true
+  image: confluentinc/cp-kafka:7.6.0
+  storage: 20Gi
+
+influxdb:
+  enabled: true
+  image: influxdb:2.7
+  storage: 50Gi
+  org: IntegratedFactory
+  bucket: raw_historian
+  token: ""  # set via secret
+
+timescaledb:
+  enabled: true
+  image: timescale/timescaledb:latest-pg16
+  storage: 100Gi
+  database: factory_agg
+
+historianWriter:
+  enabled: true
+  image: integrated-factory/historian-writer:latest
+
+mcpServer:
+  enabled: true
+  image: integrated-factory/mcp-server:latest
+  replicas: 1
+  service:
+    port: 3000
+
+agents:
+  enabled: true
+  image: integrated-factory/agents:latest
+  replicas: 1
+
+odoo:
+  enabled: true
+  image: odoo:17
+  service:
+    port: 8069
+
+solace:
+  enabled: false
+  image: solace/solace-pubsubplus:latest

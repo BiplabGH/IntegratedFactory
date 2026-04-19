@@ -1,0 +1,31 @@
+topics:
+  - name: factory.machines.cnc
+    partitions: 3
+    replication_factor: 1
+    config:
+      retention.ms: 86400000       # 1 day raw retention
+      cleanup.policy: delete
+
+  - name: factory.machines.conveyor
+    partitions: 3
+    replication_factor: 1
+    config:
+      retention.ms: 86400000
+
+  - name: factory.machines.robot
+    partitions: 3
+    replication_factor: 1
+    config:
+      retention.ms: 86400000
+
+  - name: factory.aggregated.metrics
+    partitions: 1
+    replication_factor: 1
+    config:
+      retention.ms: 604800000      # 7 days aggregated
+
+  - name: factory.alerts
+    partitions: 1
+    replication_factor: 1
+    config:
+      retention.ms: 2592000000     # 30 days alerts

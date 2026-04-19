@@ -1,0 +1,21 @@
+# Production overrides — merge on top of values.yaml
+global:
+  imageRegistry: "myacr.azurecr.io"
+
+kafka:
+  storage: 200Gi
+
+influxdb:
+  storage: 500Gi
+
+timescaledb:
+  storage: 1Ti
+
+mcpServer:
+  replicas: 2
+
+agents:
+  replicas: 2
+
+solace:
+  enabled: true

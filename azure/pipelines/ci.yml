@@ -1,0 +1,63 @@
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    displayName: Build & Test
+    jobs:
+      - job: BuildPython
+        displayName: Build Python services
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.11"
+
+          - script: |
+              pip install ruff pytest
+              ruff check opcua-simulator/src mqtt-broker/bridge/src kafka/streams/src historian/writer/src agents/src
+            displayName: Lint Python
+
+          - script: |
+              pip install -r opcua-simulator/requirements.txt
+              pip install -r agents/requirements.txt
+            displayName: Install Python deps
+
+      - job: BuildNode
+        displayName: Build MCP Server
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "20.x"
+
+          - script: |
+              cd mcp-server
+              npm ci
+              npm run build
+            displayName: Build TypeScript
+
+  - stage: DockerBuild
+    displayName: Build Docker Images
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: BuildImages
+        steps:
+          - task: Docker@2
+            displayName: Build opcua-simulator
+            inputs:
+              command: build
+              dockerfile: opcua-simulator/Dockerfile
+              tags: $(Build.BuildId)
+
+          - task: Docker@2
+            displayName: Build mcp-server
+            inputs:
+              command: build
+              dockerfile: mcp-server/Dockerfile
+              tags: $(Build.BuildId)

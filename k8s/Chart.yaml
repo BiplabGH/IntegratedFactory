@@ -1,0 +1,19 @@
+apiVersion: v2
+name: integrated-factory
+description: Helm chart for the IntegratedFactory Industrial IoT platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - iiot
+  - opcua
+  - mqtt
+  - kafka
+  - influxdb
+  - timescaledb
+  - mes
+  - mcp
+home: https://github.com/biplabgh/IntegratedFactory
+maintainers:
+  - name: Biplab Sah
+    email: biplabsah@live.com
