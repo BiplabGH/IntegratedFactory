@@ -211,6 +211,16 @@
   </style>
 </head>
 <body>
+  <div id="dev-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#ff6d00;color:white;text-align:center;padding:6px;font-family:monospace;font-size:11px;letter-spacing:2px;z-index:9999;">
+  ⚠ DEV ENVIRONMENT — staging branch
+</div>
+
+<script>
+  if (window.location.hostname.includes('dev.')) {
+    document.getElementById('dev-banner').style.display = 'block';
+  }
+</script>
+
   <canvas id="particles"></canvas>
 
   <div class="corner corner--tl"></div>
